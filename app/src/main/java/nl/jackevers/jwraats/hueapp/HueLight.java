@@ -7,7 +7,7 @@ public class HueLight {
     public int id;
     public String lightName;
     public boolean switchLightOn;
-    public float brightness;
-    public float sat;
-    public float hue;
+    public Double brightness;
+    public Double sat;
+    public Double hue;
 }

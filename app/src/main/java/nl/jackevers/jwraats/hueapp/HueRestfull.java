@@ -12,10 +12,15 @@ import com.android.volley.toolbox.JsonArrayRequest;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+
+import java.util.ArrayList;
+import java.util.Iterator;
 
 
 /**
@@ -28,7 +33,7 @@ public class HueRestfull {
     private static HueRestfull mInstance;
     private final String DISCOVER_URL = "https://www.meethue.com/api/nupnp";
     private String bridgeIp, bridgeToken, BridgeError;
-    private HueLight huelight;
+    private ArrayList<HueLight> hueLights = new ArrayList<HueLight>();
     private RequestQueue mRequestQueue;
     private static Context context;
     private AppCompatActivity activity;
@@ -98,7 +103,6 @@ public class HueRestfull {
                     try {
                         json_data = response.getJSONObject(0);
                         if(json_data.getJSONObject("error").getString("description").equals("link button not pressed")){
-                            System.out.println("Test");
                             //Alert popup comes here
                             AlertDialog.Builder builder = new AlertDialog.Builder(activity);
                             builder.setTitle("Knop indrukken")
@@ -118,6 +122,7 @@ public class HueRestfull {
                             json_data = response.getJSONObject(0).getJSONObject("success");
                             bridgeToken = json_data.getString("username");
                             System.out.println(bridgeToken);
+                            getLights();
 
                         } catch (JSONException error) {
                             System.out.println("NU is het wel echt mis! "+ error.toString());
@@ -136,6 +141,42 @@ public class HueRestfull {
             // Add the request to the RequestQueue.
             this.getRequestQueue().add(jsObjRequest);
         }
+    }
+
+    public void getLights(){
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, this.getApiUrlWithToken()+"lights", (String)null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    Iterator<String> iterator = response.keys();
+                    while(iterator.hasNext()) {
+                        String lightId = iterator.next();
+                        HueLight hueLight = new HueLight();
+                        hueLight.id =  Integer.parseInt(lightId);
+                        hueLight.lightName = response.getJSONObject(lightId).getString("name");
+                        hueLight.switchLightOn = response.getJSONObject(lightId).getJSONObject("state").getBoolean("on");
+                        if(response.getJSONObject(lightId).getString("modelid").equals("LCT001")){
+                            hueLight.sat = response.getJSONObject(lightId).getJSONObject("state").getDouble("sat");
+                        }
+                        hueLight.brightness = response.getJSONObject(lightId).getJSONObject("state").getDouble("brightness");
+                        hueLights.add(hueLight);
+                    }
+                    //Done.. RENDER THIS SHIT! todo
+                } catch (JSONException e) {
+                    System.out.println(e.toString());
+                }
+
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                System.out.println("ERRROOR! "+error.toString());
+
+            }
+        });
+        // Add the request to the RequestQueue.
+        this.getRequestQueue().add(jsObjRequest);
     }
 
 
