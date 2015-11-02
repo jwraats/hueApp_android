@@ -1,6 +1,10 @@
 package nl.jackevers.jwraats.hueapp;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.support.v7.app.AppCompatActivity;
+import android.view.WindowManager;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonArrayRequest;
@@ -27,15 +31,18 @@ public class HueRestfull {
     private HueLight huelight;
     private RequestQueue mRequestQueue;
     private static Context context;
+    private AppCompatActivity activity;
 
-    public HueRestfull(Context context){
+    public HueRestfull(Context context, AppCompatActivity activity){
         this.context = context;
+        this.activity = activity;
     }
 
-    public static synchronized HueRestfull getInstance(Context context) {
+    public static synchronized HueRestfull getInstance(Context context, AppCompatActivity activity) {
         if (mInstance == null) {
-            mInstance = new HueRestfull(context);
+            mInstance = new HueRestfull(context, activity);
         }
+        mInstance.activity = activity;
         return mInstance;
     }
     public RequestQueue getRequestQueue() {
@@ -58,8 +65,9 @@ public class HueRestfull {
                         try {
                             json_data = response.getJSONObject(0);
                             bridgeIp = json_data.getString("internalipaddress");
+                            requestToken();
                         } catch (JSONException e) {
-                            e.printStackTrace();
+                            System.out.println(e.toString());
                         }
 
                     }
@@ -76,8 +84,61 @@ public class HueRestfull {
     }
 
     public void requestToken(){
-        //ToDo
+        if(this.bridgeIp != null) {
+            JSONObject jsonObjectParameters = new JSONObject();
+            try {
+                jsonObjectParameters.put("devicetype", "HueHome#AndroidApp");
+            } catch (JSONException e) {
+                System.out.println("If this happends... WTF?");
+            }
+            JsonArrayRequest jsObjRequest = new JsonArrayRequest(Request.Method.POST, this.getApiUrl(), jsonObjectParameters.toString(), new Response.Listener<JSONArray>() {
+                @Override
+                public void onResponse(JSONArray response) {
+                    JSONObject json_data = null;
+                    try {
+                        json_data = response.getJSONObject(0);
+                        if(json_data.getJSONObject("error").getString("description").equals("link button not pressed")){
+                            System.out.println("Test");
+                            //Alert popup comes here
+                            AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+                            builder.setTitle("Knop indrukken")
+                                    .setMessage("Wilt u even de knop indrukken!")
+                                    .setCancelable(false)
+                                    .setNegativeButton("GEDAAN",new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            requestToken();
+                                        }
+                                    });
+                            AlertDialog alert = builder.create();
+                            alert.show();
+                        }
+                    } catch (JSONException tokenIsPressed) {
+                        //Token Already exist?!
+                        try {
+                            json_data = response.getJSONObject(0).getJSONObject("success");
+                            bridgeToken = json_data.getString("username");
+                            System.out.println(bridgeToken);
+
+                        } catch (JSONException error) {
+                            System.out.println("NU is het wel echt mis! "+ error.toString());
+                        }
+                    }
+
+                }
+            }, new Response.ErrorListener() {
+
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    System.out.println("FOUT! " + error.toString());
+
+                }
+            });
+            // Add the request to the RequestQueue.
+            this.getRequestQueue().add(jsObjRequest);
+        }
     }
+
+
 
     public String getApiUrl(){
         return "http://"+this.bridgeIp+"/api/";
