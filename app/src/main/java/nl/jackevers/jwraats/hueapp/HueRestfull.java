@@ -41,6 +41,9 @@ public class HueRestfull {
     public HueRestfull(Context context, AppCompatActivity activity){
         this.context = context;
         this.activity = activity;
+
+        this.bridgeIp = "192.168.178.42";
+        this.bridgeToken = "3f340f913c9b49b71672c1c524fe8beb";
     }
 
     public static synchronized HueRestfull getInstance(Context context, AppCompatActivity activity) {
@@ -89,7 +92,10 @@ public class HueRestfull {
     }
 
     public void requestToken(){
-        if(this.bridgeIp != null) {
+        if(this.bridgeToken != null){
+            getLights();
+        }
+        else if(this.bridgeIp != null) {
             JSONObject jsonObjectParameters = new JSONObject();
             try {
                 jsonObjectParameters.put("devicetype", "HueHome#AndroidApp");
@@ -143,40 +149,98 @@ public class HueRestfull {
         }
     }
 
-    public void getLights(){
-        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, this.getApiUrlWithToken()+"lights", (String)null, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                try {
-                    Iterator<String> iterator = response.keys();
-                    while(iterator.hasNext()) {
-                        String lightId = iterator.next();
-                        HueLight hueLight = new HueLight();
-                        hueLight.id =  Integer.parseInt(lightId);
-                        hueLight.lightName = response.getJSONObject(lightId).getString("name");
-                        hueLight.switchLightOn = response.getJSONObject(lightId).getJSONObject("state").getBoolean("on");
-                        if(response.getJSONObject(lightId).getString("modelid").equals("LCT001")){
-                            hueLight.sat = response.getJSONObject(lightId).getJSONObject("state").getDouble("sat");
-                        }
-                        hueLight.brightness = response.getJSONObject(lightId).getJSONObject("state").getDouble("brightness");
-                        hueLights.add(hueLight);
-                    }
-                    //Done.. RENDER THIS SHIT! todo
-                } catch (JSONException e) {
-                    System.out.println(e.toString());
+    public void updateLight(HueLight light){
+        if(light != null && this.bridgeToken != null) {
+            //Update the light
+            JSONObject jsonObjectParameters = new JSONObject();
+            try {
+                jsonObjectParameters.put("on", light.switchLightOn);
+                jsonObjectParameters.put("bri", (int)light.brightness.doubleValue());
+                jsonObjectParameters.put("hue", (int)light.hue.doubleValue());
+                if(light.sat != null) {
+                    jsonObjectParameters.put("sat", (int) light.sat.doubleValue());
                 }
-
+            } catch (JSONException e) {
+                System.out.println("If this happends... WTF?");
             }
-        }, new Response.ErrorListener() {
 
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                System.out.println("ERRROOR! "+error.toString());
+            //Request
+            JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, this.getApiUrlWithToken() + "lights/"+light.id+"/state", jsonObjectParameters.toString(), new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse(JSONObject response) {
+                    try {
+                        Iterator<String> iterator = response.keys();
+                        while (iterator.hasNext()) {
+                            String lightId = iterator.next();
+                            HueLight hueLight = new HueLight();
+                            hueLight.id = Integer.parseInt(lightId);
+                            hueLight.lightName = response.getJSONObject(lightId).getString("name");
+                            hueLight.switchLightOn = response.getJSONObject(lightId).getJSONObject("state").getBoolean("on");
+                            if (response.getJSONObject(lightId).getString("modelid").equals("LCT001")) {
+                                hueLight.sat = response.getJSONObject(lightId).getJSONObject("state").getDouble("sat");
+                            }
+                            hueLight.hue = response.getJSONObject(lightId).getJSONObject("state").getDouble("hue");
+                            hueLight.brightness = response.getJSONObject(lightId).getJSONObject("state").getDouble("bri");
+                            hueLights.add(hueLight);
+                        }
+                        //Done.. RENDER THIS SHIT! todo
+                    } catch (JSONException e) {
+                        System.out.println(e.toString());
+                    }
 
-            }
-        });
-        // Add the request to the RequestQueue.
-        this.getRequestQueue().add(jsObjRequest);
+                }
+            }, new Response.ErrorListener() {
+
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    System.out.println("ERRROOR! " + error.toString());
+
+                }
+            });
+            // Add the request to the RequestQueue.
+            this.getRequestQueue().add(jsObjRequest);
+
+
+        }
+    }
+
+    public void getLights(){
+        if(this.bridgeToken != null) {
+            JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, this.getApiUrlWithToken() + "lights", (String) null, new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse(JSONObject response) {
+                    try {
+                        Iterator<String> iterator = response.keys();
+                        while (iterator.hasNext()) {
+                            String lightId = iterator.next();
+                            HueLight hueLight = new HueLight();
+                            hueLight.id = Integer.parseInt(lightId);
+                            hueLight.lightName = response.getJSONObject(lightId).getString("name");
+                            hueLight.switchLightOn = response.getJSONObject(lightId).getJSONObject("state").getBoolean("on");
+                            if (response.getJSONObject(lightId).getString("modelid").equals("LCT001")) {
+                                hueLight.sat = response.getJSONObject(lightId).getJSONObject("state").getDouble("sat");
+                            }
+                            hueLight.hue = response.getJSONObject(lightId).getJSONObject("state").getDouble("hue");
+                            hueLight.brightness = response.getJSONObject(lightId).getJSONObject("state").getDouble("brightness");
+                            hueLights.add(hueLight);
+                        }
+                        //Done.. RENDER THIS SHIT! todo
+                    } catch (JSONException e) {
+                        System.out.println(e.toString());
+                    }
+
+                }
+            }, new Response.ErrorListener() {
+
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    System.out.println("ERRROOR! " + error.toString());
+
+                }
+            });
+            // Add the request to the RequestQueue.
+            this.getRequestQueue().add(jsObjRequest);
+        }
     }
 
 
