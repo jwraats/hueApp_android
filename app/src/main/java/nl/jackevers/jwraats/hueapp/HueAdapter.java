@@ -10,6 +10,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Created by jwraats on 03/11/15.
@@ -60,6 +61,25 @@ public class HueAdapter extends ArrayAdapter<HueLight> {
         holder.txtTitle.setText(hueLight.lightName);
         holder.switchOn.setChecked(hueLight.switchLightOn);
 
+        holder.txtTitle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(holder.hueLight.hue != null){
+                    Random rand = new Random();
+                    // nextInt is normally exclusive of the top value,
+                    // so add 1 to make it inclusive
+                    int max = 65535;
+                    int min = 0;
+                    int randomNum = rand.nextInt((max - min) + 1) + min;
+                    holder.hueLight.hue = (double)randomNum;
+                    holder.hueLight.sat = (double)255;
+                }
+                holder.hueLight.brightness = (double)255;
+                hueRest.updateLight(holder.hueLight);
+                hueRest.getLights();
+            }
+        });
+
         //http://stackoverflow.com/questions/17462372/android-java-lang-classcastexception-android-widget-linearlayout-cannot-be-cast
         holder.switchOn.setOnClickListener(new View.OnClickListener() {
 
@@ -68,13 +88,12 @@ public class HueAdapter extends ArrayAdapter<HueLight> {
                 //is chkIos checked?
                 if (((Switch) v).isChecked()) {
                     holder.hueLight.switchLightOn = true;
-                    System.out.println("Gechecked!!");
                 }
                 else{
                     holder.hueLight.switchLightOn = false;
-                    System.out.println("NIET Gechecked");
                 }
                 hueRest.updateLight(holder.hueLight);
+                hueRest.getLights();
 
             }
         });

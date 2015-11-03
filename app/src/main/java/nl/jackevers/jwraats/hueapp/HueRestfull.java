@@ -173,9 +173,9 @@ public class HueRestfull {
             }
 
             //Request
-            JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.PUT, this.getApiUrlWithToken() + "lights/"+light.id+"/state", jsonObjectParameters.toString(), new Response.Listener<JSONObject>() {
+            JsonArrayRequest jsArrayRequest = new JsonArrayRequest(Request.Method.PUT, this.getApiUrlWithToken() + "lights/"+light.id+"/state", jsonObjectParameters.toString(), new Response.Listener<JSONArray>() {
                 @Override
-                public void onResponse(JSONObject response) {
+                public void onResponse(JSONArray response) {
                     //Als goed is doet hij het gewoon :)
                 }
             }, new Response.ErrorListener() {
@@ -187,13 +187,13 @@ public class HueRestfull {
                 }
             });
             // Add the request to the RequestQueue.
-            this.getRequestQueue().add(jsObjRequest);
+            this.getRequestQueue().add(jsArrayRequest);
 
 
         }
     }
 
-    private void getLights(){
+    public void getLights(){
         if(this.bridgeToken != null) {
             JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, this.getApiUrlWithToken() + "lights", (String) null, new Response.Listener<JSONObject>() {
                 @Override
