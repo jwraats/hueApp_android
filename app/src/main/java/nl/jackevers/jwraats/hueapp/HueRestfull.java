@@ -36,18 +36,18 @@ public class HueRestfull {
     private ArrayList<HueLight> hueLights = new ArrayList<HueLight>();
     private RequestQueue mRequestQueue;
     private static Context context;
-    private AppCompatActivity activity;
+    private MainActivity activity;
 
-    public HueRestfull(Context context, AppCompatActivity activity){
+    public HueRestfull(Context context, MainActivity activity){
         this.context = context;
         this.activity = activity;
 
         //JW Thuis
-        /*this.bridgeIp = "192.168.178.42";
-        this.bridgeToken = "3f340f913c9b49b71672c1c524fe8beb";*/
+        this.bridgeIp = "192.168.178.42";
+        this.bridgeToken = "3364ad21c15d37f147578a042f7f5f";
     }
 
-    public static synchronized HueRestfull getInstance(Context context, AppCompatActivity activity) {
+    public static synchronized HueRestfull getInstance(Context context, MainActivity activity) {
         if (mInstance == null) {
             mInstance = new HueRestfull(context, activity);
         }
@@ -186,7 +186,7 @@ public class HueRestfull {
         }
     }
 
-    public void getLights(){
+    private void getLights(){
         if(this.bridgeToken != null) {
             JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, this.getApiUrlWithToken() + "lights", (String) null, new Response.Listener<JSONObject>() {
                 @Override
@@ -205,13 +205,10 @@ public class HueRestfull {
                             hueLight.hue = response.getJSONObject(lightId).getJSONObject("state").getDouble("hue");
                             hueLight.brightness = response.getJSONObject(lightId).getJSONObject("state").getDouble("bri");
                             hueLights.add(hueLight);
-
-                            //Even leuk testje.. alle kleuren rood
-                            hueLight.hue = (double)1000;
-                            updateLight(hueLight);
-
                         }
-                        //Done.. RENDER THIS SHIT! todo
+                        //Done.. RENDER THIS SHIT!
+                        activity.changeData(hueLights);
+
                     } catch (JSONException e) {
                         System.out.println(e.toString());
                     }
