@@ -73,8 +73,16 @@ public class HueAdapter extends ArrayAdapter<HueLight> {
                     int randomNum = rand.nextInt((max - min) + 1) + min;
                     holder.hueLight.hue = (double)randomNum;
                     holder.hueLight.sat = (double)255;
+                    holder.hueLight.brightness = (double)255;
+                }else {
+                    if(holder.hueLight.brightness == 255){
+                        holder.hueLight.brightness = (double)50;
+                    }else{
+                        holder.hueLight.brightness = (double)255;
+                    }
                 }
-                holder.hueLight.brightness = (double)255;
+
+
                 hueRest.updateLight(holder.hueLight);
                 hueRest.getLights();
             }
