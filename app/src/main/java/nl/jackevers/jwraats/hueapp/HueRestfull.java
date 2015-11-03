@@ -42,8 +42,9 @@ public class HueRestfull {
         this.context = context;
         this.activity = activity;
 
-        this.bridgeIp = "192.168.178.42";
-        this.bridgeToken = "3f340f913c9b49b71672c1c524fe8beb";
+        //JW Thuis
+        /*this.bridgeIp = "192.168.178.42";
+        this.bridgeToken = "3f340f913c9b49b71672c1c524fe8beb";*/
     }
 
     public static synchronized HueRestfull getInstance(Context context, AppCompatActivity activity) {
@@ -165,29 +166,10 @@ public class HueRestfull {
             }
 
             //Request
-            JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, this.getApiUrlWithToken() + "lights/"+light.id+"/state", jsonObjectParameters.toString(), new Response.Listener<JSONObject>() {
+            JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.PUT, this.getApiUrlWithToken() + "lights/"+light.id+"/state", jsonObjectParameters.toString(), new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject response) {
-                    try {
-                        Iterator<String> iterator = response.keys();
-                        while (iterator.hasNext()) {
-                            String lightId = iterator.next();
-                            HueLight hueLight = new HueLight();
-                            hueLight.id = Integer.parseInt(lightId);
-                            hueLight.lightName = response.getJSONObject(lightId).getString("name");
-                            hueLight.switchLightOn = response.getJSONObject(lightId).getJSONObject("state").getBoolean("on");
-                            if (response.getJSONObject(lightId).getString("modelid").equals("LCT001")) {
-                                hueLight.sat = response.getJSONObject(lightId).getJSONObject("state").getDouble("sat");
-                            }
-                            hueLight.hue = response.getJSONObject(lightId).getJSONObject("state").getDouble("hue");
-                            hueLight.brightness = response.getJSONObject(lightId).getJSONObject("state").getDouble("bri");
-                            hueLights.add(hueLight);
-                        }
-                        //Done.. RENDER THIS SHIT! todo
-                    } catch (JSONException e) {
-                        System.out.println(e.toString());
-                    }
-
+                    //Als goed is doet hij het gewoon :)
                 }
             }, new Response.ErrorListener() {
 
@@ -221,8 +203,13 @@ public class HueRestfull {
                                 hueLight.sat = response.getJSONObject(lightId).getJSONObject("state").getDouble("sat");
                             }
                             hueLight.hue = response.getJSONObject(lightId).getJSONObject("state").getDouble("hue");
-                            hueLight.brightness = response.getJSONObject(lightId).getJSONObject("state").getDouble("brightness");
+                            hueLight.brightness = response.getJSONObject(lightId).getJSONObject("state").getDouble("bri");
                             hueLights.add(hueLight);
+
+                            //Even leuk testje.. alle kleuren rood
+                            hueLight.hue = (double)1000;
+                            updateLight(hueLight);
+
                         }
                         //Done.. RENDER THIS SHIT! todo
                     } catch (JSONException e) {
