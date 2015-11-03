@@ -44,8 +44,11 @@ public class MainActivity extends AppCompatActivity {
                     listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                         @Override
                         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                            String product = ((TextView) view.findViewById(R.id.txtTitle)).getText().toString();
-                            System.out.println(product);
+                            if(view != null && view.findViewById(R.id.txtTitle) != null){
+                                String product = ((TextView) view.findViewById(R.id.txtTitle)).getText().toString();
+
+                            }
+                            System.out.println(position);
                         }
                     });
                 } else {

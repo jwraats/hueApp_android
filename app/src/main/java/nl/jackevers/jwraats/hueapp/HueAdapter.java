@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -44,6 +45,7 @@ public class HueAdapter extends ArrayAdapter<HueLight> {
 
             holder = new HueLightHolder();
             holder.txtTitle = (TextView)row.findViewById(R.id.txtTitle);
+            holder.switchOn = (Switch)row.findViewById(R.id.switchOn);
 
             row.setTag(holder);
         }
@@ -54,6 +56,7 @@ public class HueAdapter extends ArrayAdapter<HueLight> {
 
         HueLight hueLight = data.get(position);
         holder.txtTitle.setText(hueLight.lightName);
+        holder.switchOn.setChecked(hueLight.switchLightOn);
 
         return row;
     }
@@ -61,5 +64,6 @@ public class HueAdapter extends ArrayAdapter<HueLight> {
     static class HueLightHolder
     {
         TextView txtTitle;
+        Switch switchOn;
     }
 }
