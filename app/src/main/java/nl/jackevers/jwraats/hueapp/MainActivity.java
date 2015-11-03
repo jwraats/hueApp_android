@@ -41,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
                     listView.setAdapter(adapter);
 
                     //http://stackoverflow.com/questions/17462372/android-java-lang-classcastexception-android-widget-linearlayout-cannot-be-cast
+                    //Todo fix this..
                     listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                         @Override
                         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

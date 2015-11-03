@@ -42,9 +42,10 @@ public class HueRestfull {
         this.context = context;
         this.activity = activity;
 
+        //Todo make settings page that can be reset.
         //JW Thuis
-        this.bridgeIp = "192.168.178.42";
-        this.bridgeToken = "3364ad21c15d37f147578a042f7f5f";
+        /*this.bridgeIp = "192.168.178.42";
+        this.bridgeToken = "3364ad21c15d37f147578a042f7f5f"; */
     }
 
     public static synchronized HueRestfull getInstance(Context context, MainActivity activity) {
