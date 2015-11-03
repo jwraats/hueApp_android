@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -21,22 +20,24 @@ public class HueAdapter extends ArrayAdapter<HueLight> {
     Context context;
     int layoutResourceId;
     private ArrayList<HueLight> data = new ArrayList<HueLight>();
+    private HueRestfull hueRest;
 
     public void setData(ArrayList<HueLight> data){
         this.data = data;
     }
 
-    public HueAdapter(Context context, int layoutResourceId, ArrayList<HueLight> data) {
+    public HueAdapter(Context context, int layoutResourceId, ArrayList<HueLight> data, HueRestfull hueRest) {
         super(context, layoutResourceId, data);
         this.layoutResourceId = layoutResourceId;
         this.context = context;
         this.data = data;
+        this.hueRest = hueRest;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View row = convertView;
-        HueLightHolder holder = null;
+        final HueLightHolder holder;
 
         if(row == null)
         {
@@ -55,14 +56,34 @@ public class HueAdapter extends ArrayAdapter<HueLight> {
         }
 
         HueLight hueLight = data.get(position);
+        holder.hueLight = hueLight;
         holder.txtTitle.setText(hueLight.lightName);
         holder.switchOn.setChecked(hueLight.switchLightOn);
 
+        //http://stackoverflow.com/questions/17462372/android-java-lang-classcastexception-android-widget-linearlayout-cannot-be-cast
+        holder.switchOn.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                //is chkIos checked?
+                if (((Switch) v).isChecked()) {
+                    holder.hueLight.switchLightOn = true;
+                    System.out.println("Gechecked!!");
+                }
+                else{
+                    holder.hueLight.switchLightOn = false;
+                    System.out.println("NIET Gechecked");
+                }
+                hueRest.updateLight(holder.hueLight);
+
+            }
+        });
         return row;
     }
 
     static class HueLightHolder
     {
+        HueLight hueLight;
         TextView txtTitle;
         Switch switchOn;
     }

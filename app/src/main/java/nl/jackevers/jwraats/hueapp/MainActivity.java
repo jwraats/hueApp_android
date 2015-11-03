@@ -14,13 +14,14 @@ public class MainActivity extends AppCompatActivity {
     private ListView listView;
     private HueAdapter adapter;
     private ArrayList<HueLight> data = new ArrayList<HueLight>();
+    private HueRestfull hueRest;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         //Do stuff on the restApi
-        HueRestfull hueRest = HueRestfull.getInstance(this.getApplicationContext(), this);
+        hueRest = HueRestfull.getInstance(this.getApplicationContext(), this);
         hueRest.discoverBridge();
     }
 
@@ -32,26 +33,13 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 if (adapter == null) {
                     //Creating adapter
-                    adapter = new HueAdapter(MainActivity.this, R.layout.item_row, data);
+                    adapter = new HueAdapter(MainActivity.this, R.layout.item_row, data, hueRest);
 
                     //Creating the view
                     listView = (ListView) findViewById(R.id.listView1);
                     View header = (View) getLayoutInflater().inflate(R.layout.header_row, null);
-                    listView.addHeaderView(header);
+                    //listView.addHeaderView(header);
                     listView.setAdapter(adapter);
-
-                    //http://stackoverflow.com/questions/17462372/android-java-lang-classcastexception-android-widget-linearlayout-cannot-be-cast
-                    //Todo fix this..
-                    listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                        @Override
-                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                            if(view != null && view.findViewById(R.id.txtTitle) != null){
-                                String product = ((TextView) view.findViewById(R.id.txtTitle)).getText().toString();
-
-                            }
-                            System.out.println(position);
-                        }
-                    });
                 } else {
                     adapter.notifyDataSetChanged();
                 }

@@ -46,6 +46,10 @@ public class HueRestfull {
         //JW Thuis
         /*this.bridgeIp = "192.168.178.42";
         this.bridgeToken = "3364ad21c15d37f147578a042f7f5f"; */
+
+        //School
+        this.bridgeIp = "192.168.1.179";
+        this.bridgeToken = "2b2d87b53b28727b2f5a813dd99a53";
     }
 
     public static synchronized HueRestfull getInstance(Context context, MainActivity activity) {
@@ -158,7 +162,9 @@ public class HueRestfull {
             try {
                 jsonObjectParameters.put("on", light.switchLightOn);
                 jsonObjectParameters.put("bri", (int)light.brightness.doubleValue());
-                jsonObjectParameters.put("hue", (int)light.hue.doubleValue());
+                if(light.hue != null){
+                    jsonObjectParameters.put("hue", (int)light.hue.doubleValue());
+                }
                 if(light.sat != null) {
                     jsonObjectParameters.put("sat", (int) light.sat.doubleValue());
                 }
@@ -202,8 +208,8 @@ public class HueRestfull {
                             hueLight.switchLightOn = response.getJSONObject(lightId).getJSONObject("state").getBoolean("on");
                             if (response.getJSONObject(lightId).getString("modelid").equals("LCT001")) {
                                 hueLight.sat = response.getJSONObject(lightId).getJSONObject("state").getDouble("sat");
+                                hueLight.hue = response.getJSONObject(lightId).getJSONObject("state").getDouble("hue");
                             }
-                            hueLight.hue = response.getJSONObject(lightId).getJSONObject("state").getDouble("hue");
                             hueLight.brightness = response.getJSONObject(lightId).getJSONObject("state").getDouble("bri");
                             hueLights.add(hueLight);
                         }
